@@ -8,21 +8,21 @@ $(function () {
                 var li = $('<li>');
                 li.append('<div class="form-group"><div class="title">' + book.name);
                 li.append('<button class="delete" class="btn-warning delete">Usuń</button>');
-                li.append('<div class="divhide"><p class="autor"></p><p class="description"></p></div></div></div>')
+                li.append('<div class="divhide"><p class="autor"></p><p class="description"></p></div></div></div>');
                 li.attr("data-id", book.id);
                 list.append(li);
-            })
+            });
 
 
-        })
+        });
 
 
         //load description to book after click on title
         $('ol').on("click", '.title', function () {
 
-            var ind = $('.title').index(this)
-            var hide = $('div.divhide').eq(ind)
-            var id = $(this).parent().parent().attr('data-id')
+            var ind = $('.title').index(this);
+            var hide = $('div.divhide').eq(ind);
+            var id = $(this).parent().parent().attr('data-id');
 
             $.get("./api/books.php",
                     {id: id},
@@ -30,12 +30,75 @@ $(function () {
                         var author = JSON.parse(data)[0].author;
                         var description = JSON.parse(data)[0].description;
 
-                        $('.autor').text(author)
-                        $('.description').text(description)
+                        $('.autor').text(author);
+                        $('.description').text(description);
+
+                    });
+            hide.slideToggle();
+            var editForm = $('<form id="edit" method="PUT" action="./api/books.php">');
+
+            editForm.append('<div class="form-group">\n\
+                <label>Tytuł książki:</label>\n\
+                <div class="input-group">\n\
+                <input type="text" class="form-control" name="title" id="title">\n\
+                <div class="input-group-addon" id="type">\n\
+                </div>\n\
+                </div>\n\
+                </div>\n\
+                <div class="form-group">\n\
+                <label>Autor:</label>\n\
+                <input type="text" class="form-control" name="author" id="author">\n\
+                </div>\n\
+                <div class="clearfix">\n\
+                <div class="form-group form-group-mini">\n\
+                <label>Opis:</label>\n\
+                <input type="text" class="form-control" name="description" id="description">\n\
+                </div>\n\
+                </div>\n\
+                <br>\n\
+                <p>\n\
+                <button type="submit" class="btn-warning" id="editbutton">Zmień</button>\n\
+                </p>');
+            editForm.attr("data-id", id);
+            hide.append(editForm);
+
+        });
+
+        $('ol').on("click", '#editbutton', function (e) {
+//            e.preventDefault();
+
+            var formEdit = $('#edit')
+            var formEditData = $().serialize();
+            console.log(formEdit)
+            console.log(formEditData)
+
+            var id = $(this).parent().parent().attr('data-id');
+            var editName =  $('#title').val();
+            var editAuthor = $(this).find('#author').val();
+            var editDescription = $(this).find('#description').val();
+            
+
+            $.ajax({
+                type: 'PUT',
+                url: './api/books.php',
+                data: {
+                    id: id,
+                    name: editName,
+                    author: editAuthor,
+                    description: editDescription
+                }
+            })
+                    .done(function (response) {
+
+                        $(formMessages).text("Książka została zmieniona");
 
                     })
-            hide.slideToggle();
-        })
+
+                    .fail(function (data) {
+                        $(formMessages).text("Edycja książki niepowiodła się");
+                    });
+
+        });
 
 
         // Get the form.
@@ -89,7 +152,7 @@ $(function () {
 
         $('ol').on("click", '.delete', function () {
 
-            var id = $(this).parent().attr('data-id')
+            var id = $(this).parent().attr('data-id');
 
             $.ajax({
                 type: 'DELETE',
@@ -104,10 +167,10 @@ $(function () {
 
                     .fail(function (data) {
                         $(formMessages).text("Usuwanie książki niepowiodło się");
-                    })
-            
-        })
-    }
-    bookList()
+                    });
 
-})
+        });
+    }
+    bookList();
+
+});
