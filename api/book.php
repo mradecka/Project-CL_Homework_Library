@@ -1,5 +1,5 @@
 <?php
-
+// file with connection data
 require_once 'src/dbConnection.php';
 
 class Book implements JsonSerializable {
@@ -44,7 +44,7 @@ class Book implements JsonSerializable {
         $this->description = $description;
     }
 
-    //funkcja pobiera z bazy konkretną książkę - OK
+    //load one book
     public function loadFromDB($conn, $id) {
 
 
@@ -68,7 +68,7 @@ class Book implements JsonSerializable {
         return $array;
     }
 
-    //funkcja pobiera z bazy wszystkie książki
+    //load all books
     public function loadFromDBAll($conn) {
         $sql = 'SELECT * FROM `Book`;';
 
@@ -92,7 +92,7 @@ class Book implements JsonSerializable {
         return $array;
     }
 
-//funkcja dodaje do bazy nową książkę
+    //add new book
     public function create($conn, $name, $author, $description) {
         $sql = 'INSERT INTO `Book` (`id`, `name`, `author`, `description`) VALUES (NULL, :name, :author , :description);';
 
@@ -114,7 +114,7 @@ class Book implements JsonSerializable {
         }
     }
 
-//funkcja aktualizuje w bazie książkę
+    //update a book
     public function update(PDO $conn, $id, $name, $author, $description) {
         $sql = 'Update `Book` SET   
                                     `name` = :name, 
@@ -139,7 +139,7 @@ class Book implements JsonSerializable {
         }
     }
 
-//    funkcja usuwa z bazy książkę
+    //delete book
     public function deleteFromDB($conn, $id) {
         $sql = 'DELETE FROM `Book` WHERE `Book`.`id` = :id';
         try {
@@ -162,12 +162,5 @@ class Book implements JsonSerializable {
     }
 
 }
-
-//$book = new Book();
-//$book->loadFromDB($conn, 3);
-//$book->create($conn, 'Potop', 'Henryk Sienkiewicz', 'Dużo żołnierzy itp...');
-//$book->update($conn, 2, 'Ogniem i mieczem', 'Henryk Sienkiewicz', 'Jeszcze więcej żółnierzy itp...');
-//$book->deleteFromDB($conn, 44);
-//$book->loadFromDBAll($conn);
 ?>
 

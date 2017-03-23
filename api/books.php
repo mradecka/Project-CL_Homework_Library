@@ -3,6 +3,8 @@
 
 require_once 'book.php';
 
+
+//get a book or books on site
 if ('GET' == $_SERVER['REQUEST_METHOD']) {
     if (!empty($_GET['id']) && isset($_GET['id'])) {
         $id = $_GET['id'];
@@ -67,14 +69,14 @@ if ('POST' == $_SERVER['REQUEST_METHOD']) {
 }
 
 if ('DELETE' == $_SERVER['REQUEST_METHOD']) {
-    parse_str(file_get_contents("php://input"), $del_vars);
+    parse_str(file_get_contents("php://input"), $del);
     $delete = new Book();
-    $delete->deleteFromDB($conn, $del_vars);
+    $delete->deleteFromDB($conn, $del);
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-    parse_str(file_get_contents("php://input"), $put_vars);
+    parse_str(file_get_contents("php://input"), $edit);
     $edit = new Book();
-    $edit->update($conn, $put_vars['id'], $put_vars['name'], $put_vars['author'], $put_vars['description']);
+    $edit->update($conn, $edit['id'], $edit['name'], $edit['author'], $edit['description']);
 }
 ?>

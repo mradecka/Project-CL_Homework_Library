@@ -7,13 +7,11 @@ $(function () {
             print.forEach(function (book) {
                 var li = $('<li>');
                 li.append('<div class="form-group"><div class="title">' + book.name);
-                li.append('<button class="delete" class="btn-warning delete">Usuń</button>');
+                li.append('<button class="delete" class="btn-warning">Usuń</button>');
                 li.append('<div class="divhide"><p class="autor"></p><p class="description"></p></div></div></div>');
                 li.attr("data-id", book.id);
                 list.append(li);
             });
-
-
         });
 
 
@@ -35,7 +33,9 @@ $(function () {
 
                     });
             hide.slideToggle();
-            var editForm = $('<form id="edit" method="PUT" action="./api/books.php">');
+            
+            //create edit form
+            var editForm = $('<form id="edit" action="./api/books.php">');
 
             editForm.append('<div class="form-group">\n\
                 <label>Tytuł książki:</label>\n\
@@ -63,9 +63,9 @@ $(function () {
             hide.append(editForm);
 
         });
-
+        //edit the form using AJAX.
         $('ol').on("click", '#editbutton', function (e) {
-//            e.preventDefault();
+            e.preventDefault();
 
             var formEdit = $('#edit')
             var formEditData = $().serialize();
@@ -73,10 +73,10 @@ $(function () {
             console.log(formEditData)
 
             var id = $(this).parent().parent().attr('data-id');
-            var editName =  $('#title').val();
+            var editName = $('#title').val();
             var editAuthor = $(this).find('#author').val();
             var editDescription = $(this).find('#description').val();
-            
+
 
             $.ajax({
                 type: 'PUT',
@@ -101,21 +101,21 @@ $(function () {
         });
 
 
-        // Get the form.
+        // get the form.
         var form = $('#ajax-contact');
 
-        // Get the messages div.
+        // get the messages div.
         var formMessages = $('#form-messages');
 
 
         $(form).submit(function (e) {
-            // Stop the browser from submitting the form.
+            // stop the browser from submitting the form.
             e.preventDefault();
 
-            // Serialize the form data.
+            // serialize the form data.
             var formData = $(form).serialize();
 
-            // Submit the form using AJAX.
+            // submit the form using AJAX.
             $.ajax({
                 type: 'POST',
                 url: $(form).attr('action'),
@@ -149,7 +149,7 @@ $(function () {
 
         });
 
-
+        //delete book
         $('ol').on("click", '.delete', function () {
 
             var id = $(this).parent().attr('data-id');
@@ -171,6 +171,7 @@ $(function () {
 
         });
     }
+    
     bookList();
 
 });
