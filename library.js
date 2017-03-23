@@ -67,10 +67,8 @@ $(function () {
         $('ol').on("click", '#editbutton', function (e) {
             e.preventDefault();
 
-            var formEdit = $('#edit')
+            var formEdit = $('#edit');
             var formEditData = $().serialize();
-            console.log(formEdit)
-            console.log(formEditData)
 
             var id = $(this).parent().parent().attr('data-id');
             var editName = $('#title').val();
