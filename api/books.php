@@ -76,7 +76,7 @@ if ('DELETE' == $_SERVER['REQUEST_METHOD']) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     parse_str(file_get_contents("php://input"), $edit);
-    $edit = new Book();
-    $edit->update($conn, $edit['id'], $edit['name'], $edit['author'], $edit['description']);
+    $editBook = new Book();
+    $editBook->update($conn, $edit['id'], $edit['name'], $edit['author'], $edit['description']);
 }
 ?>

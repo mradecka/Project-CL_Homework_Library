@@ -1,8 +1,9 @@
 $(function () {
     var list = $('#books');
-
+    list.innerHTML = null;
     //Load all books
     function bookList() {
+
         $.getJSON('./api/books.php', function (print) {
             print.forEach(function (book) {
                 var li = $('<li>');
@@ -13,31 +14,30 @@ $(function () {
                 list.append(li);
             });
         });
+    }
+    //load description to book after click on title
+    $('ol').on("click", '.title', function () {
 
+        var ind = $('.title').index(this);
+        var hide = $('div.divhide').eq(ind);
+        var id = $(this).parent().parent().attr('data-id');
 
-        //load description to book after click on title
-        $('ol').on("click", '.title', function () {
+        $.get("./api/books.php",
+                {id: id},
+                function (data) {
+                    var author = JSON.parse(data)[0].author;
+                    var description = JSON.parse(data)[0].description;
 
-            var ind = $('.title').index(this);
-            var hide = $('div.divhide').eq(ind);
-            var id = $(this).parent().parent().attr('data-id');
+                    $('.autor').text(author);
+                    $('.description').text(description);
 
-            $.get("./api/books.php",
-                    {id: id},
-                    function (data) {
-                        var author = JSON.parse(data)[0].author;
-                        var description = JSON.parse(data)[0].description;
+                });
+        hide.slideToggle();
 
-                        $('.autor').text(author);
-                        $('.description').text(description);
+        //create edit form
+        var editForm = $('<form id="edit" action="./api/books.php">');
 
-                    });
-            hide.slideToggle();
-            
-            //create edit form
-            var editForm = $('<form id="edit" action="./api/books.php">');
-
-            editForm.append('<div class="form-group">\n\
+        editForm.append('<div class="form-group">\n\
                 <label>Tytuł książki:</label>\n\
                 <div class="input-group">\n\
                 <input type="text" class="form-control" name="title" id="title">\n\
@@ -59,117 +59,127 @@ $(function () {
                 <p>\n\
                 <button type="submit" class="btn-warning" id="editbutton">Zmień</button>\n\
                 </p>');
-            editForm.attr("data-id", id);
-            hide.append(editForm);
+        editForm.attr("data-id", id);
+        hide.append(editForm);
 
-        });
-        //edit the form using AJAX.
-        $('ol').on("click", '#editbutton', function (e) {
-            e.preventDefault();
+    });
+    //edit the form using AJAX.
+    $('ol').on("click", '#editbutton', function (e) {
+        e.preventDefault();
 
-            var formEdit = $('#edit');
-            var formEditData = $().serialize();
+        var formEdit = $('#edit');
+        var formEditData = $().serialize();
 
-            var id = $(this).parent().parent().attr('data-id');
-            var editName = $('#title').val();
-            var editAuthor = $(this).find('#author').val();
-            var editDescription = $(this).find('#description').val();
+        var id = $(this).parent().parent().attr('data-id');
+        console.log(id);
+        var editName = $(this).parent().parent().find('#title').val();
+
+        console.log(editName);
+        var editAuthor = $(this).parent().parent().find('#author').val();
+        console.log(editAuthor);
+        var editDescription = $(this).parent().parent().find('#description').val();
+        console.log(editDescription);
+
+        $.ajax({
+            type: 'PUT',
+            url: './api/books.php',
+            data: {
+                id: id,
+                name: editName,
+                author: editAuthor,
+                description: editDescription
+            }
+        })
+                .done(function (response) {
+
+                    $(formMessages).text("Książka została zmieniona");
+
+                })
+
+                .fail(function (data) {
+                    $(formMessages).text("Edycja książki niepowiodła się");
+                })
+
+                .always(function (data) {
+                    console.log(data);
+                    $(formMessages).text("Coś tam robi");
+                });
+        bookList();
+    });
 
 
-            $.ajax({
-                type: 'PUT',
-                url: './api/books.php',
-                data: {
-                    id: id,
-                    name: editName,
-                    author: editAuthor,
-                    description: editDescription
-                }
-            })
-                    .done(function (response) {
+    // get the form.
+    var form = $('#ajax-contact');
 
-                        $(formMessages).text("Książka została zmieniona");
-
-                    })
-
-                    .fail(function (data) {
-                        $(formMessages).text("Edycja książki niepowiodła się");
-                    });
-
-        });
+    // get the messages div.
+    var formMessages = $('#form-messages');
 
 
-        // get the form.
-        var form = $('#ajax-contact');
+    $(form).submit(function (e) {
+        // stop the browser from submitting the form.
+        e.preventDefault();
 
-        // get the messages div.
-        var formMessages = $('#form-messages');
+        // serialize the form data.
+        var formData = $(form).serialize();
 
+        // submit the form using AJAX.
+        $.ajax({
+            type: 'POST',
+            url: $(form).attr('action'),
+            data: formData
+        })
+                .done(function (response) {
+                    // Make sure that the formMessages div has the 'success' class.
+                    $(formMessages).removeClass('error');
+                    $(formMessages).addClass('success');
 
-        $(form).submit(function (e) {
-            // stop the browser from submitting the form.
-            e.preventDefault();
+                    // Set the message text.
+                    $(formMessages).text(response);
 
-            // serialize the form data.
-            var formData = $(form).serialize();
+                    // Clear the form.
+                    $('#title').val('');
+                    $('#author').val('');
+                    $('#description').val('');
+                })
+                .fail(function (data) {
+                    // Make sure that the formMessages div has the 'error' class.
+                    $(formMessages).removeClass('success');
+                    $(formMessages).addClass('error');
 
-            // submit the form using AJAX.
-            $.ajax({
-                type: 'POST',
-                url: $(form).attr('action'),
-                data: formData
-            })
-                    .done(function (response) {
-                        // Make sure that the formMessages div has the 'success' class.
-                        $(formMessages).removeClass('error');
-                        $(formMessages).addClass('success');
+                    // Set the message text.
+                    if (data.responseText !== '') {
+                        $(formMessages).text(data.responseText);
+                    } else {
+                        $(formMessages).text('Oops! An error occured and your message could not be sent.');
+                    }
+                });
+        bookList();
+    });
 
-                        // Set the message text.
-                        $(formMessages).text(response);
+    //delete book
+    $('ol').on("click", '.delete', function () {
 
-                        // Clear the form.
-                        $('#title').val('');
-                        $('#author').val('');
-                        $('#description').val('');
-                    })
-                    .fail(function (data) {
-                        // Make sure that the formMessages div has the 'error' class.
-                        $(formMessages).removeClass('success');
-                        $(formMessages).addClass('error');
+        var id = $(this).parent().attr('data-id');
 
-                        // Set the message text.
-                        if (data.responseText !== '') {
-                            $(formMessages).text(data.responseText);
-                        } else {
-                            $(formMessages).text('Oops! An error occured and your message could not be sent.');
-                        }
-                    });
+        $.ajax({
+            type: 'DELETE',
+            url: './api/books.php',
+            data: {id: id}
+        })
+                .done(function (response) {
 
-        });
+                    $(formMessages).text("Książka została usunięta");
 
-        //delete book
-        $('ol').on("click", '.delete', function () {
+                })
 
-            var id = $(this).parent().attr('data-id');
+                .fail(function (data) {
+                    $(formMessages).text("Usuwanie książki niepowiodło się");
+                });
 
-            $.ajax({
-                type: 'DELETE',
-                url: './api/books.php',
-                data: {id: id}
-            })
-                    .done(function (response) {
-
-                        $(formMessages).text("Książka została usunięta");
-
-                    })
-
-                    .fail(function (data) {
-                        $(formMessages).text("Usuwanie książki niepowiodło się");
-                    });
-
-        });
-    }
-    
+        bookList()
+    });
+console.log(list);
+    if(list.innerHTML == null) {
     bookList();
-
+    }
 });
