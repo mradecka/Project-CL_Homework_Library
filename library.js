@@ -1,6 +1,6 @@
 $(function () {
     var list = $('#books');
-    list.innerHTML = null;
+
     //Load all books
     function bookList() {
 
@@ -14,15 +14,16 @@ $(function () {
                 list.append(li);
             });
         });
-    }
+    
     //load description to book after click on title
-    $('ol').on("click", '.title', function () {
-
+    $('ol').on("click", '.title', function (ev) {
+        ev.preventDefault();
         var ind = $('.title').index(this);
         var hide = $('div.divhide').eq(ind);
         var id = $(this).parent().parent().attr('data-id');
 
         $.get("./api/books.php",
+        
                 {id: id},
                 function (data) {
                     var author = JSON.parse(data)[0].author;
@@ -64,23 +65,18 @@ $(function () {
 
     });
     //edit the form using AJAX.
-    $('ol').on("click", '#editbutton', function (e) {
-        e.preventDefault();
+    $('ol').on("click", '#editbutton', function (ev) {
+        ev.preventDefault();
 
         var formEdit = $('#edit');
         var formEditData = $().serialize();
-
         var id = $(this).parent().parent().attr('data-id');
-        console.log(id);
         var editName = $(this).parent().parent().find('#title').val();
-
-        console.log(editName);
         var editAuthor = $(this).parent().parent().find('#author').val();
-        console.log(editAuthor);
         var editDescription = $(this).parent().parent().find('#description').val();
-        console.log(editDescription);
 
         $.ajax({
+            complete:function(){location.reload()},
             type: 'PUT',
             url: './api/books.php',
             data: {
@@ -104,7 +100,7 @@ $(function () {
                     console.log(data);
                     $(formMessages).text("Coś tam robi");
                 });
-        bookList();
+       
     });
 
 
@@ -115,15 +111,16 @@ $(function () {
     var formMessages = $('#form-messages');
 
 
-    $(form).submit(function (e) {
+    $(form).submit(function (ev) {
         // stop the browser from submitting the form.
-        e.preventDefault();
+        ev.preventDefault();
 
         // serialize the form data.
         var formData = $(form).serialize();
 
         // submit the form using AJAX.
         $.ajax({
+            complete:function(){location.reload()},
             type: 'POST',
             url: $(form).attr('action'),
             data: formData
@@ -153,15 +150,16 @@ $(function () {
                         $(formMessages).text('Oops! An error occured and your message could not be sent.');
                     }
                 });
-        bookList();
+       
     });
 
     //delete book
-    $('ol').on("click", '.delete', function () {
-
+    $('ol').on("click", '.delete', function (ev) {
+        ev.preventDefault();
         var id = $(this).parent().attr('data-id');
 
         $.ajax({
+            complete:function(){location.reload()},
             type: 'DELETE',
             url: './api/books.php',
             data: {id: id}
@@ -176,10 +174,8 @@ $(function () {
                     $(formMessages).text("Usuwanie książki niepowiodło się");
                 });
 
-        bookList()
+        
     });
-console.log(list);
-    if(list.innerHTML == null) {
+}
     bookList();
-    }
 });
